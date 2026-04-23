@@ -1,10 +1,17 @@
 #pragma once
-
-class B {
+#include<vector>
+struct Node {
+    std::vector<int> keys;
+    std::vector<int> rids;
+    std::vector<Node*> child_ptrs;
+    Node(int order);
+};
+class B{
     private:
         int order;
-
-    
+        Node* root;
+        void split(int key);
+        void merge(int key);
     public:
         B(int d);
         void insert(int key);
