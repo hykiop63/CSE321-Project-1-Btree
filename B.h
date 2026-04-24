@@ -7,13 +7,13 @@ struct Node {
     std::vector<int> keys;
     std::vector<int> rids;
     std::vector<Node*> child_ptrs;
-    Node(int order,Node* p);
+    Node(int order,bool leaf,Node* p);
 };
 class B{
     private:
         int order;
         Node* root;
-        void split(int key);
+        void split(Node* target);
         void merge(int key);
         int inNode_find(int key,Node* curr_n);
         std::pair<Node*,int> inter_search(int key);
