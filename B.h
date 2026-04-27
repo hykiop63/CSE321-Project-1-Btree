@@ -14,7 +14,8 @@ class B{
         int order;
         Node* root;
         void split(Node* target);
-        void merge(int key);
+        void merge(Node* target);
+        bool rotate(Node* target);
         int inNode_find(int key,Node* curr_n);
         std::pair<Node*,int> inter_search(int key);
     public:

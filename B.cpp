@@ -57,6 +57,68 @@ void B::split(Node* target) {
         }
     }
 }
+void B::merge(Node* target){
+    return;
+}
+bool B::rotate(Node* target){
+    if(target->parent==nullptr) return false;
+    Node* p=target->parent;
+    Node* r_s=p->child_ptrs[0];
+    Node* l_s=p->child_ptrs[0];
+    int i;
+    if(p->child_ptrs[0]==target){//r_s만 존재
+        r_s=p->child_ptrs[1];
+        l_s=nullptr;
+        i=0;
+    }
+    else if(p->child_ptrs.back()==target){//l_s만 존재
+        r_s=nullptr;
+        l_s=p->child_ptrs[p->child_ptrs.size()-2];
+        i=p->child_ptrs.size()-1;
+    }
+    else{
+        for(i=1;i<p->child_ptrs.size();i++){
+            if(p->child_ptrs[i]==target){
+                r_s=p->child_ptrs[i+1];
+                l_s=p->child_ptrs[i-1];
+                l_s=l_s->keys.size() < r_s->keys.size()?
+                    nullptr : l_s;//l_s가 null인경우에만 r_s에서 가져옴
+                r_s=l_s==nullptr?
+                    r_s : nullptr;
+                break;
+            }
+        }
+    }
+    if(l_s!=nullptr && l_s->keys.size()>(order-1)/2){// i means target==p->child_ptrs[i]
+        target->keys.insert(target->keys.begin(),p->keys[i-1]);
+        p->keys[i-1]=l_s->keys.back();
+        l_s->keys.pop_back();
+        target->rids.insert(target->rids.begin(),p->rids[i-1]);
+        p->rids[i-1]=l_s->rids.back();
+        l_s->rids.pop_back();
+        if(!target->is_leaf){
+            target->child_ptrs.insert(target->child_ptrs.begin(),l_s->child_ptrs.back());
+            l_s->child_ptrs.pop_back();
+            target->child_ptrs.front()->parent=target;
+        }
+        return true;
+    }
+    else if(r_s!=nullptr && r_s->keys.size()>(order-1)/2){
+        target->keys.push_back(p->keys[i]);
+        p->keys[i]=r_s->keys.front();
+        r_s->keys.erase(r_s->keys.begin());
+        target->rids.push_back(p->rids[i]);
+        p->rids[i]=r_s->rids.front();
+        r_s->rids.erase(r_s->rids.begin());
+        if(!target->is_leaf){
+            target->child_ptrs.push_back(r_s->child_ptrs.front());
+            r_s->child_ptrs.erase(r_s->child_ptrs.begin());
+            target->child_ptrs.back()->parent=target;
+        }
+        return true;
+    }
+    return false;
+}
 int B::inNode_find(int key,Node* curr_n){
     int left=0;
     int right=curr_n->keys.size()-1;
@@ -69,7 +131,6 @@ int B::inNode_find(int key,Node* curr_n){
     }
     return left;//자식으로 이동해야함
 }
-// B 클래스 내부의 search 함수 구현
 std::pair<Node*,int> B::inter_search(int key) {
     std::cout << key << " 검색 로직 실행\n";
     Node* now_check=root;
@@ -81,10 +142,7 @@ std::pair<Node*,int> B::inter_search(int key) {
         now_check = now_check->child_ptrs[idx];
     }
 }
-// B 클래스 내부의 insert 함수 구현
 void B::insert(int key,int rid) {
-    std::cout << key << " 삽입 로직 실행\n";
-    // 실제 B-Tree 노드 분할 및 삽입 로직 작성
     std::pair<Node*,int> target=inter_search(key);
     Node* now_leaf=target.first;
     int idx=target.second;
@@ -99,11 +157,33 @@ void B::insert(int key,int rid) {
 void B::remove(int key){
     std::cout << key << " 검색 로직 실행\n";
     std::pair<Node*,int> target=inter_search(key);
-    Node* now_leaf=target.first;
+    Node* now=target.first;
     int idx=target.second;
-    if(idx<now_leaf->keys.size() && now_leaf->keys[idx]==key){
-        now_leaf->keys.erase(now_leaf->keys.begin() + idx);
-        now_leaf->rids.erase(now_leaf->rids.begin() + idx);
+    if(idx<now->keys.size() && now->keys[idx]==key){
+        if(now->is_leaf){
+            now->keys.erase(now->keys.begin() + idx);
+            now->rids.erase(now->rids.begin() + idx);
+        }
+        Node* pre=now->child_ptrs[idx];
+        Node* succ=now->child_ptrs[idx+1];
+        while(!pre->is_leaf) pre=pre->child_ptrs.back();
+        while(!succ->is_leaf) succ=succ->child_ptrs.front();
+        if(pre->keys.size()<succ->keys.size()){
+            now->keys[idx]=succ->keys.front();
+            now->rids[idx]=succ->rids.front();
+            succ->keys.erase(succ->keys.begin());
+            succ->rids.erase(succ->rids.begin());
+            if(!rotate(succ))
+                merge(succ);
+        }
+        else{
+            now->keys[idx]=pre->keys.front();
+            now->rids[idx]=pre->rids.front();
+            pre->keys.erase(pre->keys.begin());
+            pre->rids.erase(pre->rids.begin());
+            if(!rotate(pre))
+                merge(pre);
+        } 
     }
     else{
         std::cout<<"없는 key"<<key<<"\n";
