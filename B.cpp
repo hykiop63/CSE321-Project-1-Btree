@@ -8,7 +8,6 @@ Node::Node(int order,bool leaf,Node* p){
     rids.reserve(order);
     child_ptrs.reserve(order+1);
 }
-// B 클래스 내부의 생성자 구현
 B::B(int d) {
     order = d;
     root=new Node(d,true,nullptr);
@@ -58,6 +57,34 @@ void B::split(Node* target) {
     }
 }
 void B::merge(Node* target){
+    while(target!=root && target->keys.size()<(order-1)/2){
+        Node*p=target->parent;
+        if(p->child_ptrs[0]==target){
+            target=p->child_ptrs[1];
+        }
+        int i=1;
+        while(target!=p->child_ptrs[i]) i++;
+        Node* l_s=p->child_ptrs[i-1];
+        l_s->keys.push_back(p->keys[i-1]);
+        l_s->rids.push_back(p->rids[i-1]);
+        p->keys.erase(p->keys.begin()+i-1);
+        p->rids.erase(p->rids.begin()+i-1);
+        p->child_ptrs.erase(p->child_ptrs.begin()+i);
+        l_s->keys.insert(l_s->keys.end(),target->keys.begin(),target->keys.end());
+        l_s->rids.insert(l_s->rids.end(),target->rids.begin(),target->rids.end());
+        l_s->child_ptrs.insert(l_s->child_ptrs.end(),target->child_ptrs.begin(),target->child_ptrs.end());
+        for(auto q : target->child_ptrs){
+            q->parent=l_s;
+        }
+        delete target;
+        target=p;
+    }
+    if (root->keys.size()==0&&!root->is_leaf) {
+        Node* old_root =root;
+        root =root->child_ptrs[0];
+        root->parent =nullptr;
+        delete old_root;
+    }
     return;
 }
 bool B::rotate(Node* target){
