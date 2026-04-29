@@ -16,6 +16,7 @@ class B{
         void split(Node* target);
         void merge(Node* target);
         bool rotate(Node* target);
+        void underflow(Node* target);
         int inNode_find(int key,Node* curr_n);
         std::pair<Node*,int> inter_search(int key);
     public:

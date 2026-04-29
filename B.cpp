@@ -57,7 +57,7 @@ void B::split(Node* target) {
     }
 }
 void B::merge(Node* target){
-    while(target!=root && target->keys.size()<(order-1)/2){
+    if(target!=root && target->keys.size()<(order-1)/2){
         Node*p=target->parent;
         if(p->child_ptrs[0]==target){
             target=p->child_ptrs[1];
@@ -77,9 +77,8 @@ void B::merge(Node* target){
             q->parent=l_s;
         }
         delete target;
-        target=p;
     }
-    if (root->keys.size()==0&&!root->is_leaf) {
+    if(root->keys.size()==0&&!root->is_leaf) {
         Node* old_root =root;
         root =root->child_ptrs[0];
         root->parent =nullptr;
@@ -146,6 +145,16 @@ bool B::rotate(Node* target){
     }
     return false;
 }
+void B::underflow(Node* target){
+    if(target==root) return;
+    if(target->keys.size()<(order-1)/2){
+        Node* temp=target->parent;
+        bool parent_is_root=target->parent==root;
+        if(rotate(target)) return;
+        merge(target);
+        if(!parent_is_root) underflow(temp);
+    }
+}
 int B::inNode_find(int key,Node* curr_n){
     int left=0;
     int right=curr_n->keys.size()-1;
@@ -191,8 +200,7 @@ void B::remove(int key){
         if(now->is_leaf){
             now->keys.erase(now->keys.begin() + idx);
             now->rids.erase(now->rids.begin() + idx);
-            if(!rotate(now))
-                merge(now);
+            underflow(now);
             return;
         }
         Node* pre=now->child_ptrs[idx];
@@ -206,16 +214,14 @@ void B::remove(int key){
             now->rids[idx]=succ->rids.front();
             succ->keys.erase(succ->keys.begin());
             succ->rids.erase(succ->rids.begin());
-            if(!rotate(succ))
-                merge(succ);
+            underflow(succ);
         }
         else{
             now->keys[idx]=pre->keys.back();
             now->rids[idx]=pre->rids.back();
             pre->keys.pop_back();
             pre->rids.pop_back();
-            if(!rotate(pre))
-                merge(pre);
+            underflow(pre);
         } 
     }
     else{
