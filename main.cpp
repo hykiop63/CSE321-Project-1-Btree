@@ -3,20 +3,18 @@
 #include<sstream>
 #include<vector>
 #include<string>
+#include <cassert>
 #include "B.h"
 struct Student {
-    int id;               // Key (학번)
-    std::string name;     // 이름
-    std::string gender;   // 성별
-    float gpa;            // 평점
-    float height_weight;  // 키/몸무게
+    int id;  
+    std::string name;    
+    std::string gender;   
+    float gpa;            
+    float height_weight; 
 };
+
 int main() {
-    // 10만 개의 레코드를 담을 In-memory array
-    // 이 배열의 '인덱스'가 곧 트리에 저장될 'RID'가 됩니다.
     std::vector<Student> student_array;
-    
-    // 파일 열기 (csv 파일이 실행 파일과 같은 디렉토리에 있어야 합니다)
     std::ifstream file("student.csv"); 
 
     if (!file.is_open()) {
@@ -48,6 +46,20 @@ int main() {
         std::cout << "[테스트] RID 0번의 학번(Key): " << student_array[0].id 
                   << ", 이름: " << student_array[0].name << "\n";
     }
-
+    int order;
+    std::cin>>order;
+    B Btree(order);
+    for(int i=0;i<500;i++){
+        Btree.insert(student_array[i].id,i);
+        assert(Btree.verify()==true); 
+        //Btree.level_order();
+    }
+    for(int i=10;i<50;i++){
+        std::cout<<"delete :"<<i<<" "<<student_array[i].id<<"\n";
+        Btree.remove(student_array[i].id);
+        //Btree.level_order();
+        assert(Btree.verify()==true); 
+        
+    }
     return 0;
 }

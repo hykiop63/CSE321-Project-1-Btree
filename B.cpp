@@ -1,6 +1,6 @@
 #include "B.h"
 #include <iostream>
-
+#include <queue>
 Node::Node(int order,bool leaf,Node* p){
     parent=p;
     is_leaf=leaf;
@@ -159,7 +159,6 @@ int B::inNode_find(int key,Node* curr_n){
     return left;//자식으로 이동해야함
 }
 std::pair<Node*,int> B::inter_search(int key) {
-    std::cout << key << " 검색 로직 실행\n";
     Node* now_check=root;
     while(true){
         int idx=inNode_find(key,now_check);
@@ -182,19 +181,26 @@ void B::insert(int key,int rid) {
     split(now_leaf);
 }
 void B::remove(int key){
-    std::cout << key << " 검색 로직 실행\n";
+    
     std::pair<Node*,int> target=inter_search(key);
+    
     Node* now=target.first;
     int idx=target.second;
+    
     if(idx<now->keys.size() && now->keys[idx]==key){
         if(now->is_leaf){
             now->keys.erase(now->keys.begin() + idx);
             now->rids.erase(now->rids.begin() + idx);
+            if(!rotate(now))
+                merge(now);
+            return;
         }
         Node* pre=now->child_ptrs[idx];
         Node* succ=now->child_ptrs[idx+1];
+        
         while(!pre->is_leaf) pre=pre->child_ptrs.back();
         while(!succ->is_leaf) succ=succ->child_ptrs.front();
+        
         if(pre->keys.size()<succ->keys.size()){
             now->keys[idx]=succ->keys.front();
             now->rids[idx]=succ->rids.front();
@@ -204,10 +210,10 @@ void B::remove(int key){
                 merge(succ);
         }
         else{
-            now->keys[idx]=pre->keys.front();
-            now->rids[idx]=pre->rids.front();
-            pre->keys.erase(pre->keys.begin());
-            pre->rids.erase(pre->rids.begin());
+            now->keys[idx]=pre->keys.back();
+            now->rids[idx]=pre->rids.back();
+            pre->keys.pop_back();
+            pre->rids.pop_back();
             if(!rotate(pre))
                 merge(pre);
         } 
@@ -223,4 +229,103 @@ int B::search(int key){
         result.first->keys[result.second]==key)
             return result.first->rids[result.second];
     return -1;
+}
+void B::level_order() {
+    if (root == nullptr) return;
+    std::queue<Node*> q;
+    q.push(root);
+    while (!q.empty()) {
+        int level = q.size();
+        while (level--) {
+            Node* curr = q.front();
+            q.pop();
+            std::cout << "[ ";
+            for (int key : curr->keys) std::cout << key << " ";
+            std::cout << "] ";
+            if (!curr->is_leaf) 
+                for (Node* child : curr->child_ptrs) q.push(child);
+        }
+        std::cout << "\n"; 
+    }
+}
+bool B::verify(){
+    if(root==nullptr){
+        std :: cout<<"null tree\n";
+        return true;
+    }
+    struct Verify_Node {
+        Node* node;
+        int min;
+        int max;
+        int depth;
+    };
+    std::queue<Verify_Node> q;
+    q.push({root, 0,1000000001, 0});//key is student number it 202XXXXXX integer.
+    int leaf_depth = -1;
+    while (!q.empty()) {
+        Verify_Node curr = q.front();
+        q.pop();
+        Node* tnode = curr.node;
+        // number of key
+        int min_keys = tnode==root ?  0 : (order-1)/2;
+        int max_keys = order-1;
+        if (tnode->keys.size() < min_keys ) {
+            std::cout << "key need more much\n";
+            return false;
+        }
+        else if(tnode->keys.size() > max_keys){
+            std::cout << "key need more less\n";
+            return false;
+        }
+        // BST
+        for (int i = 0; i < tnode->keys.size(); i++) {
+            if (tnode->keys[i] < curr.min ) {
+                std::cout << "key need more big\n";
+                return false;
+            }
+            else if(tnode->keys[i] > curr.max){
+                std::cout<<tnode->keys[i]<<" "<<curr.max<<"\n";
+                std::cout << "key need more small\n";
+                return false;
+            }
+            if (i > 0 && tnode->keys[i - 1] >= tnode->keys[i]) {
+                std::cout << "innode keys not sorted\n";
+                return false;
+            }
+        }
+        //leaf node
+        if (tnode->is_leaf) {
+            if (leaf_depth == -1) leaf_depth = curr.depth; 
+            else if (leaf_depth != curr.depth) {
+                std::cout << "all leaf must same depth\n";
+                return false;
+            }
+            if (tnode->child_ptrs.size() != 0) {
+                std::cout << "leaf has not child\n";
+                return false;
+            }
+        } 
+        //internal node
+        else {
+            if (tnode->child_ptrs.size() != tnode->keys.size() + 1) {
+                std::cout << "childs must keys+1\n";
+                return false;
+            }
+            for (int i=0;i<tnode->child_ptrs.size();i++) {
+                Node* child = tnode->child_ptrs[i];
+                if (child == nullptr) {
+                    std::cout << "child is null\n";
+                    return false;
+                }
+                if (child->parent != tnode) {
+                    std::cout << "child not match parent\n";
+                    return false;
+                }
+                int next_min = (i==0) ? curr.min : tnode->keys[i-1] + 1;
+                int next_max = (i==tnode->keys.size()) ? curr.max : tnode->keys[i]-1;
+                q.push({child, next_min, next_max, curr.depth+1});
+            }
+        }
+    }
+    return true;
 }

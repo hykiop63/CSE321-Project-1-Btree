@@ -23,6 +23,8 @@ class B{
         void insert(int key,int rid);
         void remove(int key);
         int search(int key);
+        void level_order();
+        bool verify();
         
 
 
