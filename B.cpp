@@ -273,7 +273,7 @@ bool B::verify(){
         q.pop();
         Node* tnode = curr.node;
         // number of key
-        int min_keys = tnode==root ?  0 : (order-1)/2;
+        int min_keys = tnode==root ? (int)!tnode->is_leaf : (order-1)/2;
         int max_keys = order-1;
         if (tnode->keys.size() < min_keys ) {
             std::cout << "key need more much\n";

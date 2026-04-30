@@ -49,6 +49,24 @@ int main() {
     int order;
     std::cin>>order;
     B Btree(order);
+    for(int j=0;j<1000;j++){
+        for(int i=j*100;i<(j+1)*100;i++){
+            std::cout<<"insert :"<<i<<" "<<student_array[i].id<<"\n";
+            Btree.insert(student_array[i].id,i);
+            assert(Btree.verify()==true); 
+            //Btree.level_order();
+        }
+        for(int i=j*100;i<(j+1)*100;i++){
+            if(student_array[Btree.search(student_array[i].id)].id!=student_array[i].id)
+                std::cout<<"mismatch:"<<i<<"\n";
+        }
+        for(int i=j*100;i<(j+1)*100;i++){
+            std::cout<<"delete :"<<i<<" "<<student_array[i].id<<"\n";
+            Btree.remove(student_array[i].id);
+            assert(Btree.verify()==true); 
+            
+        }
+    }
     for(int i=0;i<100000;i++){
         std::cout<<"insert :"<<i<<" "<<student_array[i].id<<"\n";
         Btree.insert(student_array[i].id,i);
