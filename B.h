@@ -30,7 +30,28 @@ class B{
         bool verify();
 };
 class BStar {
-    // B*-트리 선언
+    private:
+        int order;
+        Node* root;
+        void split_root(Node* target);
+        void split(Node* target);
+        void merge_3_to_2(Node* l_s,Node* target,Node* r_s,Node* p,int i);
+        void merge_3_to_3(Node* l_s,Node* target,Node* r_s,Node* p,int i);
+        void merge_2_to_1(Node* l_s,Node* r_s,Node* p);
+        void merge(Node* target);
+        bool rotate(Node* target);
+        bool rotate_insert(Node* target);
+        void underflow(Node* target);
+        void overflow(Node* target);
+        int inNode_find(int key,Node* curr_n);
+        std::pair<Node*,int> inter_search(int key);
+    public:
+        BStar(int d);
+        void insert(int key,int rid);
+        void remove(int key);
+        int search(int key);
+        void level_order();
+        bool verify();
 };
 
 class BPlus {
