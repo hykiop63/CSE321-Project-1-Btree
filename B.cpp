@@ -10,10 +10,13 @@ Node::Node(int order,bool leaf,Node* p){
 }
 B::B(int d) {
     order = d;
+    split_count=0;
+    merge_count=0;
     root=new Node(d,true,nullptr);
 }
 void B::split(Node* target) {
     while (target->keys.size() >= order) {
+        split_count++;
         int mid = target->keys.size() / 2;
         int upkey = target->keys[mid];
         int uprid = target->rids[mid];
@@ -57,6 +60,7 @@ void B::split(Node* target) {
     }
 }
 void B::merge(Node* target){
+    merge_count++;
     if(target!=root && target->keys.size()<(order-1)/2){
         Node*p=target->parent;
         if(p->child_ptrs[0]==target){
@@ -225,7 +229,7 @@ void B::remove(int key){
         } 
     }
     else{
-        std::cout<<"없는 key"<<key<<"\n";
+        //std::cout<<"없는 key"<<key<<"\n";
         return;
     }
 }
@@ -236,22 +240,57 @@ int B::search(int key){
             return result.first->rids[result.second];
     return -1;
 }
+std::vector<int> B::range(int min_key,int max_key){
+    std::vector<int> result;
+    if (root == nullptr) return result;
+    std::queue<Node*> q;
+    q.push(root);
+    while (!q.empty()) {
+        Node* curr=q.front();
+        q.pop();
+        int idx=inNode_find(min_key,curr);
+        int last=curr->child_ptrs.size();
+        for(int i=idx;i<curr->rids.size();i++){
+            if(curr->keys[i]>max_key){
+                last=i+1;
+                break;
+            } 
+            result.push_back(curr->rids[i]);
+            if(curr->keys[i]==max_key){
+                last=i+1;
+                break;
+            } 
+            
+        }
+        if(!curr->is_leaf){
+            if(curr->keys.size()>idx&&curr->keys[idx]==min_key)idx++;
+            for(;idx<last;idx++)
+                q.push(curr->child_ptrs[idx]);
+        }
+    }
+    return result;
+}
 void B::level_order() {
     if (root == nullptr) return;
     std::queue<Node*> q;
+    total_nodes=0;
+    total_elements=0;
     q.push(root);
     while (!q.empty()) {
         int level = q.size();
         while (level--) {
             Node* curr = q.front();
             q.pop();
+            total_nodes++;
+            total_elements+=curr->keys.size();
+            /*
             std::cout << "[ ";
             for (int key : curr->keys) std::cout << key << " ";
-            std::cout << "] ";
+            std::cout << "] ";*/
             if (!curr->is_leaf) 
                 for (Node* child : curr->child_ptrs) q.push(child);
         }
-        std::cout << "\n"; 
+        //std::cout << "\n"; 
     }
 }
 bool B::verify(){
@@ -335,3 +374,9 @@ bool B::verify(){
     }
     return true;
 }
+void B::delete_all(Node* node) {
+    if (node == nullptr) return;
+    if (!node->is_leaf) for (Node* child : node->child_ptrs) delete_all(child);
+    delete node; 
+}
+B::~B(){delete_all(root);}

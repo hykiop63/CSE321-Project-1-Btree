@@ -3,12 +3,15 @@
 #include <queue>
 BPlus::BPlus(int d) {
     order = d;
+    split_count=0;
+    merge_count=0;
     root=new Node(d,true,nullptr);
     root->pre_leaf=nullptr;
     root->next_leaf=nullptr;
 }
 void BPlus::split(Node* target) {
     while (target->keys.size() >= order) {
+        split_count++;
         int mid = target->keys.size() / 2;
         int upkey = target->keys[mid];
         Node* temp = new Node(order, target->is_leaf, target->parent);
@@ -43,6 +46,7 @@ void BPlus::split(Node* target) {
     }
 }
 void BPlus::split(Node* target,bool leaf) {
+    split_count++;
     int mid = target->keys.size() / 2;
     int upkey = target->keys[mid];
     Node* temp = new Node(order, target->is_leaf, target->parent);
@@ -77,6 +81,7 @@ void BPlus::split(Node* target,bool leaf) {
 }
 void BPlus::merge(Node* target){
     if(target!=root && target->keys.size()<(order-1)/2){
+        merge_count++;
         Node*p=target->parent;
         if(p->child_ptrs[0]==target){
             target=p->child_ptrs[1];
@@ -104,6 +109,7 @@ void BPlus::merge(Node* target){
 }
 void BPlus::merge(Node* target,bool leaf){
     if(target!=root && target->keys.size()<(order-1)/2){
+        merge_count++;
         Node*p=target->parent;
         if(p->child_ptrs[0]==target){
             target=p->child_ptrs[1];
@@ -270,7 +276,7 @@ void BPlus::insert(int key,int rid) {
         std::cout<<"삽입단계 고장남:"<<key<<"\n";
         return;
     }
-    if(now_leaf->keys[idx]==key){
+    if(idx<now_leaf->keys.size()&&now_leaf->keys[idx]==key){
         std::cout<<"이미 있는 key:"<<key<<"\n";
         return;
     }
@@ -291,8 +297,8 @@ void BPlus::remove(int key){
         now->rids.erase(now->rids.begin() + idx);
         underflow(now);
     }
-    else
-        std::cout<<"없는 key"<<key<<"\n";
+    //else
+        //std::cout<<"없는 key"<<key<<"\n";
 }
 int BPlus::search(int key){
     std::pair<Node*,int> result=inter_search(key);
@@ -301,22 +307,45 @@ int BPlus::search(int key){
             return result.first->rids[result.second];
     return -1;
 }
+std::vector<int> BPlus::range(int min_key,int max_key){
+    std::vector<int> result;
+    std::pair<Node*,int> f=inter_search(min_key);
+    if(f.first!=nullptr && f.first->is_leaf){
+        Node* temp=f.first;
+        int idx=f.second;
+        while(temp!=nullptr){
+            for(int i=idx;i<temp->keys.size();i++){
+                if(temp->keys[i]>max_key) return result;
+                result.push_back(temp->rids[i]);
+            }
+            temp=temp->next_leaf;
+            idx=0;
+        }
+        return result;
+    }
+    return result;
+}
 void BPlus::level_order() {
     if (root == nullptr) return;
     std::queue<Node*> q;
+    total_nodes=0;
+    total_elements=0;
     q.push(root);
     while (!q.empty()) {
         int level = q.size();
         while (level--) {
             Node* curr = q.front();
             q.pop();
+            total_nodes++;
+            total_elements+=curr->keys.size();
+            /*
             std::cout << "[ ";
             for (int key : curr->keys) std::cout << key << " ";
-            std::cout << "] ";
+            std::cout << "] ";*/
             if (!curr->is_leaf) 
                 for (Node* child : curr->child_ptrs) q.push(child);
         }
-        std::cout << "\n"; 
+        //std::cout << "\n"; 
     }
 }
 bool BPlus::verify(){
@@ -437,3 +466,9 @@ bool BPlus::verify(){
     }
     return true;
 }
+void BPlus::delete_all(Node* node) {
+    if (node == nullptr) return;
+    if (!node->is_leaf) for (Node* child : node->child_ptrs) delete_all(child);
+    delete node; 
+}
+BPlus::~BPlus(){delete_all(root);}

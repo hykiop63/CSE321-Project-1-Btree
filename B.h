@@ -14,6 +14,7 @@ struct Node {
 class B{
     private:
         int order;
+        
         Node* root;
         void split(Node* target);
         void merge(Node* target);
@@ -21,17 +22,25 @@ class B{
         void underflow(Node* target);
         int inNode_find(int key,Node* curr_n);
         std::pair<Node*,int> inter_search(int key);
+        void delete_all(Node* node);
     public:
         B(int d);
+        ~B();
+        int split_count;
+        int merge_count;
+        int total_nodes;
+        int total_elements;
         void insert(int key,int rid);
         void remove(int key);
         int search(int key);
+        std::vector<int> range(int min_key,int max_key);
         void level_order();
         bool verify();
 };
 class BStar {
     private:
         int order;
+        
         Node* root;
         void split_root(Node* target);
         void split(Node* target);
@@ -45,11 +54,18 @@ class BStar {
         void overflow(Node* target);
         int inNode_find(int key,Node* curr_n);
         std::pair<Node*,int> inter_search(int key);
+        void delete_all(Node* node);
     public:
         BStar(int d);
+        ~BStar();
+        int split_count;
+        int merge_count;
+        int total_nodes;
+        int total_elements;
         void insert(int key,int rid);
         void remove(int key);
         int search(int key);
+        std::vector<int> range(int min_key,int max_key);
         void level_order();
         bool verify();
 };
@@ -57,6 +73,7 @@ class BStar {
 class BPlus {
     private:
         int order;
+        
         Node* root;
         void split(Node* target);
         void split(Node* target,bool leaf);
@@ -67,12 +84,18 @@ class BPlus {
         void underflow(Node* target);
         int inNode_find(int key,Node* curr_n);
         std::pair<Node*,int> inter_search(int key);
+        void delete_all(Node* node);
     public:
         BPlus(int d);
+        ~BPlus();
+        int split_count;
+        int merge_count;
+        int total_nodes;
+        int total_elements;
         void insert(int key,int rid);
         void remove(int key);
         int search(int key);
+        std::vector<int> range(int min_key,int max_key);
         void level_order();
         bool verify();
-    // B+-트리 선언
 };

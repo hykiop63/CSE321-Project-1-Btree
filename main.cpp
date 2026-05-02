@@ -5,14 +5,7 @@
 #include<string>
 #include <cassert>
 #include "B.h"
-struct Student {
-    int id;  
-    std::string name;    
-    std::string gender;   
-    float gpa;            
-    float height_weight; 
-};
-
+#include "test.h"
 int main() {
     std::vector<Student> student_array;
     std::ifstream file("student.csv"); 
@@ -46,44 +39,24 @@ int main() {
         std::cout << "[테스트] RID 0번의 학번(Key): " << student_array[0].id 
                   << ", 이름: " << student_array[0].name << "\n";
     }
-    int order;
-    std::cin>>order;
-    BStar Btree(order);
-    for(int j=0;j<1000;j++){
-        for(int i=j*100;i<(j+1)*100;i++){
-            std::cout<<"insert :"<<i<<" "<<student_array[i].id<<"\n";
-            Btree.insert(student_array[i].id,i);
-            //Btree.level_order();
-            assert(Btree.verify()==true); 
-            
-        }
-        for(int i=j*100;i<(j+1)*100;i++){
-            if(student_array[Btree.search(student_array[i].id)].id!=student_array[i].id)
-                std::cout<<"mismatch:"<<i<<"\n";
-        }
-        for(int i=j*100;i<(j+1)*100;i++){
-            std::cout<<"delete :"<<i<<" "<<student_array[i].id<<"\n";
-            Btree.remove(student_array[i].id);
-            //Btree.level_order();
-            assert(Btree.verify()==true); 
-            
-        }
+    /*
+    BStar Btree(3);
+    for(int i=0;i<100000;i++){
+        //std::cout<<"insert :"<<i<<" "<<student_array[i].id<<"\n";
+        Btree.insert(student_array[i].id,i);
+        //Btree.level_order();
+        //assert(Btree.verify()==true); 
+        
     }
     for(int i=0;i<100000;i++){
         std::cout<<"insert :"<<i<<" "<<student_array[i].id<<"\n";
-        Btree.insert(student_array[i].id,i);
-        assert(Btree.verify()==true); 
-        //Btree.level_order();
-    }
-    for(int i=0;i<100000;i++){
-        if(student_array[Btree.search(student_array[i].id)].id!=student_array[i].id)
-            std::cout<<"mismatch:"<<i<<"\n";
-    }
-    for(int i=10;i<100000;i++){
-        std::cout<<"delete :"<<i<<" "<<student_array[i].id<<"\n";
         Btree.remove(student_array[i].id);
         assert(Btree.verify()==true); 
-        
-    }
+        //Btree.level_order();
+    }*/
+    insertion_parmeter_test(student_array);
+    point_search_test(student_array);
+    range_test(student_array);
+    deletion_test(student_array);
     return 0;
 }

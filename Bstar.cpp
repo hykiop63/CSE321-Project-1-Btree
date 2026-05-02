@@ -3,11 +3,14 @@
 #include <queue>
 BStar::BStar(int d) {
     order = d;
+    split_count=0;
+    merge_count=0;
     root=new Node(d,true,nullptr);
 }
 void BStar::split_root(Node* target){
     int k = (2*order-1)/3;
     if(target->keys.size() >=3*k+2) {
+        split_count++;
         int upkey1 = target->keys[k];
         int uprid1 = target->rids[k];
         int upkey2 = target->keys[2*k+1];
@@ -48,6 +51,7 @@ void BStar::split_root(Node* target){
 void BStar::split(Node* target) {
     
     if (target->keys.size() >= order) {
+        split_count++;
         Node*p=target->parent;
         Node*temp=new Node(order,target->is_leaf,p);
         if(p->child_ptrs[0]==target){
@@ -207,7 +211,10 @@ void BStar::merge_2_to_1(Node* l_s,Node* r_s,Node* p){
     delete p;
 }
 void BStar::merge(Node* target){
+
     if(target!=root && target->keys.size()<(2*order-1)/3){
+        
+        merge_count++;
         Node*p=target->parent;
         if(p==root&&p->child_ptrs.size()==2){
             merge_2_to_1(p->child_ptrs[0],p->child_ptrs[1],p);
@@ -223,8 +230,11 @@ void BStar::merge(Node* target){
         while(target!=p->child_ptrs[i]) i++;
         Node* l_s=p->child_ptrs[i-1];
         Node* r_s=p->child_ptrs[i+1];
-        if(target->keys.size()+l_s->keys.size()+r_s->keys.size()+1<=2*(order-1))
+        if(target->keys.size()+l_s->keys.size()+r_s->keys.size()+1<=2*(order-1)){
+            //std::cout<<target->keys.size()+l_s->keys.size()+r_s->keys.size()+1<<" merge pro\n";
             merge_3_to_2(l_s,target,r_s,p,i);
+        }
+            
         else
             merge_3_to_3(l_s,target,r_s,p,i);
     }
@@ -414,12 +424,13 @@ void BStar::insert(int key,int rid) {
     overflow(now_leaf);
 }
 void BStar::remove(int key){
-    
     std::pair<Node*,int> target=inter_search(key);
-    
     Node* now=target.first;
     int idx=target.second;
-    
+    if(now == nullptr){
+        //std::cout<<"없는 key"<<key<<"\n";
+        return;
+    }
     if(idx<now->keys.size() && now->keys[idx]==key){
         if(now->is_leaf){
             now->keys.erase(now->keys.begin() + idx);
@@ -432,7 +443,6 @@ void BStar::remove(int key){
         
         while(!pre->is_leaf) pre=pre->child_ptrs.back();
         while(!succ->is_leaf) succ=succ->child_ptrs.front();
-        
         if(pre->keys.size()<succ->keys.size()){
             now->keys[idx]=succ->keys.front();
             now->rids[idx]=succ->rids.front();
@@ -449,7 +459,7 @@ void BStar::remove(int key){
         } 
     }
     else{
-        std::cout<<"없는 key"<<key<<"\n";
+        //std::cout<<"없는 key"<<key<<"\n";
         return;
     }
 }
@@ -460,22 +470,57 @@ int BStar::search(int key){
             return result.first->rids[result.second];
     return -1;
 }
+std::vector<int> BStar::range(int min_key,int max_key){
+    std::vector<int> result;
+    if (root == nullptr) return result;
+    std::queue<Node*> q;
+    q.push(root);
+    while (!q.empty()) {
+        Node* curr=q.front();
+        q.pop();
+        int idx=inNode_find(min_key,curr);
+        int last=curr->child_ptrs.size();
+        for(int i=idx;i<curr->rids.size();i++){
+            if(curr->keys[i]>max_key){
+                last=i+1;
+                break;
+            } 
+            result.push_back(curr->rids[i]);
+            if(curr->keys[i]==max_key){
+                last=i+1;
+                break;
+            } 
+            
+        }
+        if(!curr->is_leaf){
+            if(curr->keys.size()>idx&&curr->keys[idx]==min_key)idx++;
+            for(;idx<last;idx++)
+                q.push(curr->child_ptrs[idx]);
+        }
+    }
+    return result;
+}
 void BStar::level_order() {
     if (root == nullptr) return;
     std::queue<Node*> q;
+    total_nodes=0;
+    total_elements=0;
     q.push(root);
     while (!q.empty()) {
         int level = q.size();
         while (level--) {
             Node* curr = q.front();
             q.pop();
+            total_nodes++;
+            total_elements+=curr->keys.size();
+            /*
             std::cout << "[ ";
             for (int key : curr->keys) std::cout << key << " ";
-            std::cout << "] ";
+            std::cout << "] ";*/
             if (!curr->is_leaf) 
                 for (Node* child : curr->child_ptrs) q.push(child);
         }
-        std::cout << "\n"; 
+        //std::cout << "\n"; 
     }
 }
 bool BStar::verify(){
@@ -559,3 +604,9 @@ bool BStar::verify(){
     }
     return true;
 }
+void BStar::delete_all(Node* node) {
+    if (node == nullptr) return;
+    if (!node->is_leaf) for (Node* child : node->child_ptrs) delete_all(child);
+    delete node; 
+}
+BStar::~BStar(){delete_all(root);}

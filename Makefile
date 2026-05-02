@@ -3,7 +3,7 @@ CXXFLAGS = -std=c++17 -Wall
 
 TARGET = ass1
 
-SRCS = main.cpp B.cpp Bstar.cpp Bplus.cpp
+SRCS = main.cpp B.cpp Bstar.cpp Bplus.cpp test.cpp
 
 OBJS = $(SRCS:.cpp=.o)
 
