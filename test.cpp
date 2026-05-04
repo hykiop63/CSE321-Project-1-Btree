@@ -71,13 +71,13 @@ template <typename TreeClass>MetricResult insertion(const std::vector<Student>& 
     
     return result;
 }
-void insertion_parmeter_test(const std::vector<Student>& v){
+void insertion_parmeter_test(const std::vector<Student>& v,int max_d=5001){
     std::ofstream file("insert.csv");
     file << "order,"
          << "B_time,B_split,B_util,"
          << "BPlus_time,BPlus_split,BPlus_util,"
          << "BStar_time,BStar_split,BStar_util\n";
-    for(int d=3;d<=5000;d++){
+    for(int d=3;d<max_d;d++){
         MetricResult b = insertion<B>(v, d);
         //std::cout<<"b\n";
         MetricResult bpuls = insertion<BPlus>(v, d);
@@ -93,7 +93,7 @@ void insertion_parmeter_test(const std::vector<Student>& v){
     file.close();
     std::cout<<"CSV for insertion\n";
 }
-void point_search_test(const std::vector<Student>& v){//same d.
+void point_search_test(const std::vector<Student>& v,int max_d=5001){//same d.
     std::ofstream file("point_search.csv");
     file << "order,"
          << "B_time,"
@@ -102,7 +102,7 @@ void point_search_test(const std::vector<Student>& v){//same d.
     std::vector<int> target(100000);
     for(int i=0;i<100000;i++)
         target[i]=getRandom(0,99999);
-    for(int d=3;d<5001;d++){
+    for(int d=3;d<max_d;d++){
         std::cout<<d<<"\n";
         file << d << ",";
         B Btree(d);
@@ -148,7 +148,7 @@ void point_search_test(const std::vector<Student>& v){//same d.
     }
         
 }
-void range_test(const std::vector<Student>& v){//same d.
+void range_test(const std::vector<Student>& v,int max_d=5001){//same d.
     std::ofstream file("range.csv");
     file << "order,"
          << "avg length,"
@@ -161,7 +161,7 @@ void range_test(const std::vector<Student>& v){//same d.
         target_min[i]=202000000+getRandom(0,699999);
         target_max[i]=getRandom(target_min[i],202699999);
     }   
-    for(int d=3;d<5001;d++){
+    for(int d=3;d<max_d;d++){
         std::cout<<d<<"\n";
         file << d << ",";
         B Btree(d);
@@ -197,7 +197,7 @@ void range_test(const std::vector<Student>& v){//same d.
         file << (long long)((end-start).count()/length) << "\n";
     }
 }
-void deletion_test(const std::vector<Student>& v){
+void deletion_test(const std::vector<Student>& v,int max_d=5001){
     std::ofstream file("deletion.csv");
     file << "order,"
          << "B_time,B_merge,"
@@ -206,7 +206,7 @@ void deletion_test(const std::vector<Student>& v){
     std::vector<int> target(100000);
     for(int i=0;i<10000;i++)
         target[i]=getRandom(0,99999);
-    for(int d=4;d<5001;d++){
+    for(int d=4;d<max_d;d++){
         std::cout<<d<<"\n";
         file << d << ",";
         B Btree(d);

@@ -14,7 +14,7 @@ struct MetricResult{
 };
 void B_test1(const std::vector<Student>& v,const int order);
 MetricResult insertion(const std::vector<Student>& v,int order);
-void insertion_parmeter_test(const std::vector<Student>& v);
-void point_search_test(const std::vector<Student>& v);
-void range_test(const std::vector<Student>& v);
-void deletion_test(const std::vector<Student>& v);
+void insertion_parmeter_test(const std::vector<Student>& v,int max_d=5001);
+void point_search_test(const std::vector<Student>& v,int max_d=5001);
+void range_test(const std::vector<Student>& v,int max_d=5001);
+void deletion_test(const std::vector<Student>& v,int max_d=5001);

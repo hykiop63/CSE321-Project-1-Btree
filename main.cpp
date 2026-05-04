@@ -54,9 +54,10 @@ int main() {
         assert(Btree.verify()==true); 
         //Btree.level_order();
     }*/
-    insertion_parmeter_test(student_array);
-    point_search_test(student_array);
-    range_test(student_array);
-    deletion_test(student_array);
+    int max_d=5001;
+    insertion_parmeter_test(student_array,max_d);
+    point_search_test(student_array,max_d);
+    range_test(student_array,max_d);
+    deletion_test(student_array,max_d);
     return 0;
 }
