@@ -71,7 +71,7 @@ template <typename TreeClass>MetricResult insertion(const std::vector<Student>& 
     
     return result;
 }
-void insertion_parmeter_test(const std::vector<Student>& v,int max_d=5001){
+void insertion_parmeter_test(const std::vector<Student>& v,int max_d){
     std::ofstream file("insert.csv");
     file << "order,"
          << "B_time,B_split,B_util,"
@@ -93,7 +93,7 @@ void insertion_parmeter_test(const std::vector<Student>& v,int max_d=5001){
     file.close();
     std::cout<<"CSV for insertion\n";
 }
-void point_search_test(const std::vector<Student>& v,int max_d=5001){//same d.
+void point_search_test(const std::vector<Student>& v,int max_d){//same d.
     std::ofstream file("point_search.csv");
     file << "order,"
          << "B_time,"
@@ -148,7 +148,7 @@ void point_search_test(const std::vector<Student>& v,int max_d=5001){//same d.
     }
         
 }
-void range_test(const std::vector<Student>& v,int max_d=5001){//same d.
+void range_test(const std::vector<Student>& v,int max_d){//same d.
     std::ofstream file("range.csv");
     file << "order,"
          << "avg length,"
@@ -197,7 +197,7 @@ void range_test(const std::vector<Student>& v,int max_d=5001){//same d.
         file << (long long)((end-start).count()/length) << "\n";
     }
 }
-void deletion_test(const std::vector<Student>& v,int max_d=5001){
+void deletion_test(const std::vector<Student>& v,int max_d){
     std::ofstream file("deletion.csv");
     file << "order,"
          << "B_time,B_merge,"
