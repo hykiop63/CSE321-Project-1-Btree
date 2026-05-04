@@ -99,7 +99,6 @@ void point_search_test(const std::vector<Student>& v){//same d.
          << "B_time,"
          << "BPlus_time,"
          << "BStar_time\n";
-    int test_orders[10] = {3,5,7,10,20,50,100,500,1000,1500};
     std::vector<int> target(100000);
     for(int i=0;i<100000;i++)
         target[i]=getRandom(0,99999);
@@ -115,14 +114,13 @@ void point_search_test(const std::vector<Student>& v){//same d.
             Bstar.insert(v[i].id,i);
         }
         auto start = std::chrono::high_resolution_clock::now();
-        for(int i=0;i<1;i++)
-            for(int j=0;j<100000;j++)
-                if(target[j]!=Btree.search(v[target[j]].id)){
-                    std::cout<<"rid:"<<target[j]<<" "<<Btree.search(v[target[j]].id)<<"\n";
-                    std::cout<<"error";
-                    file.close();
-                    return;
-                }
+        for(int j=0;j<100000;j++)
+            if(target[j]!=Btree.search(v[target[j]].id)){
+                std::cout<<"rid:"<<target[j]<<" "<<Btree.search(v[target[j]].id)<<"\n";
+                std::cout<<"error";
+                file.close();
+                return;
+            }
         auto end = std::chrono::high_resolution_clock::now();
         file << (long long)((end-start).count()/100000) << ",";
         start = std::chrono::high_resolution_clock::now();
@@ -181,25 +179,22 @@ void range_test(const std::vector<Student>& v){//same d.
         file << length/1000 << ",";
         length=0;
         auto start = std::chrono::high_resolution_clock::now();
-        for(int i=0;i<1;i++)
-            for(int j=0;j<1000;j++)
-                length+=Btree.range(target_min[j],target_max[j]).size();
+        for(int j=0;j<1000;j++)
+            length+=Btree.range(target_min[j],target_max[j]).size();
         auto end = std::chrono::high_resolution_clock::now();
-        file << (long long)((end-start).count()/1000) << ",";
+        file << (long long)((end-start).count()/length) << ",";
         length=0;
         start = std::chrono::high_resolution_clock::now();
-        for(int i=0;i<1;i++)
-            for(int j=0;j<1000;j++)
-                length+=Bplus.range(target_min[j],target_max[j]).size();
+        for(int j=0;j<1000;j++)
+            length+=Bplus.range(target_min[j],target_max[j]).size();
         end = std::chrono::high_resolution_clock::now();
-        file << (long long)((end-start).count()/1000) << ",";
+        file << (long long)((end-start).count()/length) << ",";
         length=0;
         start = std::chrono::high_resolution_clock::now();
-        for(int i=0;i<1;i++)
-            for(int j=0;j<1000;j++)
-                length+=Bstar.range(target_min[j],target_max[j]).size();
+        for(int j=0;j<1000;j++)
+            length+=Bstar.range(target_min[j],target_max[j]).size();
         end = std::chrono::high_resolution_clock::now();
-        file << (long long)((end-start).count()/1000) << "\n";
+        file << (long long)((end-start).count()/length) << "\n";
     }
 }
 void deletion_test(const std::vector<Student>& v){
